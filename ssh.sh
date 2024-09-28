@@ -22,10 +22,16 @@ done
 
 if $found; then
 	knock_host $host $ipv4
+	if [ -n "$SSH_USER" ]; then
+		host="${SSH_USER}@$host"
+	fi
 	#echo "ssh $options $host $cmd"
 	#echo -ne "\033]30;ssh $host\007"
 	/usr/bin/env ssh $options $host $cmd
 else
+	if [ -n "$SSH_USER" ]; then
+		host="${SSH_USER}@$host"
+	fi
 	#echo "ssh $ipv4 $host $*"
 	#echo -ne "\033]30;ssh $host\007"
 	/usr/bin/env ssh $options $host $cmd
