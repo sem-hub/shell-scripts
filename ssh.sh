@@ -15,7 +15,7 @@ if [ $need_ip4 = true ]; then
 fi
 found=false
 for h in $HOSTS; do
-	if [ $host = $h ]; then
+	if [ "$host" = "$h" ]; then
 		found=true
 	fi
 done
@@ -26,7 +26,7 @@ if $found; then
 	#echo -ne "\033]30;ssh $host\007"
 	/usr/bin/env ssh $options $host $cmd
 else
-	#echo "ssh $ipv4 $options $host $*"
+	#echo "ssh $ipv4 $host $*"
 	#echo -ne "\033]30;ssh $host\007"
 	/usr/bin/env ssh $options $host $cmd
 fi
