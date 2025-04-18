@@ -6,11 +6,14 @@
 PING_COUNT=5
 RESULT_NUMBER=0
 DEBUG=0
+PROTOCOL="tls://"
+SCRIPT_READY=0
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -c|--count) PING_COUNT="$2"; shift ;;
         -n|--num) RESULT_NUMBER="$2"; shift ;;
         -d|--debug) DEBUG=1 ;;
+	-s|--script) SCRIPT_READY=1 ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -18,7 +21,8 @@ done
 
 result=""
 hosts=()
-for h in $(curl -sSf https://raw.githubusercontent.com/yggdrasil-network/public-peers/refs/heads/master/europe/russia.md|awk '/(tcp|tls|quic|ws):\/\/([-a-zA-Z0-9\.:\[\]]+):[0-9]+/ {print gensub(/\s+\* `(tcp|tls|quic|ws):\/\/\[?([-a-zA-Z0-9\.:]+)\]?:[0-9]+.*`.*$/, "\\2", 1)}' | sort -u); do
+content=$(curl -sSf https://raw.githubusercontent.com/yggdrasil-network/public-peers/refs/heads/master/europe/russia.md)
+for h in $(echo "$content"|awk '/(tcp|tls|quic|ws):\/\/([-a-zA-Z0-9\.:\[\]]+):[0-9]+/ {print gensub(/\s+\* `(tcp|tls|quic|ws):\/\/\[?([-a-zA-Z0-9\.:]+)\]?:[0-9]+.*`.*$/, "\\2", 1)}' | sort -u); do
 	hosts+=($h)
 done
 echo Found ${#hosts[@]} public peers
@@ -80,8 +84,36 @@ echo
 if [ $DEBUG -eq 1 ]; then
 	echo "================== SORTED RESULTS =================="
 fi
-if [ $RESULT_NUMBER -eq 0 ]; then
-	echo "$result"|grep -v '^$'|sort -n -k3
+
+sorted=$(echo "$result"|grep -v '^$'|sort -n -k3)
+if [ $SCRIPT_READY -eq 0 ]; then
+	if [ $RESULT_NUMBER -eq 0 ]; then
+		echo "${sorted}"
+	else
+		echo "${sorted}"|head -n $RESULT_NUMBER
+	fi
 else
-	echo "$result"|grep -v '^$'|sort -n -k3|head -n $RESULT_NUMBER
+	peers=()
+	for f in "${sorted}"; do
+		p=$(echo "$f"|grep -v '^$'|awk '{ print $1 }')
+		found=0
+		for i in "${!peers[@]}"; do
+			if [ "$p" == "${peers[$i]}" ]; then
+				found=1
+			fi
+		done
+		if [ $found -eq 0 ]; then
+			peers+=($p)
+		fi
+	done
+	i=0
+	for e in "${peers[@]}"; do
+		if [ $RESULT_NUMBER -eq 0 -o $i -lt $RESULT_NUMBER ]; then
+			p=$(echo "$content"|grep "${PROTOCOL}${e}"|sed -e 's/^[^`]*`//;s/`.*$//')
+			if [ "$p" != "" ]; then
+				echo $p
+				i=$((i+1))
+			fi
+		fi
+	done
 fi
