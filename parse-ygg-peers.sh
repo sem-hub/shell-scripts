@@ -81,7 +81,7 @@ if [ $DEBUG -eq 1 ]; then
 	echo "================== SORTED RESULTS =================="
 fi
 if [ $RESULT_NUMBER -eq 0 ]; then
-	echo "$result"|sort -n -k3
+	echo "$result"|grep -v '^$'|sort -n -k3
 else
-	echo "$result"|sort -n -k3|head -n $RESULT_NUMBER
+	echo "$result"|grep -v '^$'|sort -n -k3|head -n $RESULT_NUMBER
 fi
