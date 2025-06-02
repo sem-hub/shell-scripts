@@ -7,7 +7,7 @@ fi
 
 release=$(curl --silent https://go.dev/doc/devel/release | grep -Eo 'go[0-9]+(\.[0-9]+)+' | sort -V | uniq | tail -1)
 
-installed=($(go version))
+installed=($(/usr/local/go/bin/go version))
 arch=$(echo ${installed[3]}|sed 's#/#-#')
 
 if [ ${release} != ${installed[2]} ]; then
@@ -22,4 +22,4 @@ else
 	echo "golang is up to date"
 fi
 
-go version
+/usr/local/go/bin/go version
