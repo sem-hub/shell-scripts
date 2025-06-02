@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ip --color=never route|grep default|sed -E 's/^.*dev ([a-z0-9]+) proto.*$/\1/'

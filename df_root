@@ -1,0 +1,3 @@
+#!/bin/bash
+
+df|head -1 && df|grep '/$'
