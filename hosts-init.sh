@@ -1,9 +1,9 @@
 #!/bin/bash
 
-HOSTS=$(cat ~/data/hosts.list)
+HOSTS=$(cat ~/data/hosts.list|grep -v ^#)
 
 function knock_host {
-	echo knocking to $1 $2
+	#echo knocking to $1 $2
 	ipv4=$2
 	knock_seq=$((cat ~/data/knocking/$1.knock) 2> /dev/null)
 	if [ $? != 0 ]; then
