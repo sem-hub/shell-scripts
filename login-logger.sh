@@ -21,6 +21,6 @@ fi
 
 echo ${LOG_ENTRY} >> ${LOG_FILE}
 
-curl -s -X POST https://api.telegram.org/$BOT_ID/sendMessage -d chat_id=$CHAT_ID -d text="$LOG_ENTRY"
+curl -s --connect-timeout 2 -X POST https://api.telegram.org/$BOT_ID/sendMessage -d chat_id=$CHAT_ID -d text="$LOG_ENTRY"
 
 exit 0
