@@ -222,7 +222,7 @@ EOF
         "type": "field"
       },
       {
-        "inboundTag": "socks-in",
+        "inboundTag": [ "vless-in", "socks-in" ],
         "outboundTag": "direct"
       }
     ]
