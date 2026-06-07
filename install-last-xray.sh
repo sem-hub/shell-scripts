@@ -142,6 +142,127 @@ install_geodata() {
   return 0
 }
 
+install_startup_service_file() {
+  cat >/etc/systemd/system/xray.service <<EOF
+[Unit]
+Description=Xray Service
+Documentation=https://github.com/xtls
+After=network.target nss-lookup.target
+
+[Service]
+User=nobody
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/local/bin/xray run -confdir /usr/local/etc/xray
+Restart=on-failure
+RestartPreventExitStatus=23
+LimitNPROC=10000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+}
+
+install_configs() {
+  cat > ${CONF_DIR}/00_log.json << EOF
+{   
+  "log": {
+    "loglevel": "warnings"
+  }
+}
+EOF
+  cat > ${CONF_DIR}/20_dns.json << EOF
+{
+  "dns": {
+    "servers": [
+      {
+        "address": "tls://9.9.9.9"
+      },
+      "localhost"
+    ]
+  },
+  "tag": "dns_inbound"
+}
+EOF
+  cat > ${CONF_DIR}/30_routing.json << EOF
+{
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "protocol": "bittorent",
+        "outboundTag": "block"
+      },
+      {
+        "port": 853,
+        "outboundTag": "direct"
+      },
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "ip": [
+          "geoip:ru"
+        ],
+        "outboundTag": "block",
+        "type": "field"
+      },
+      {
+        "domain": [
+          "geosite:category-ru"
+        ],
+        "outboundTag": "block",
+        "type": "field"
+      },
+      {
+        "inboundTag": "socks-in",
+        "outboundTag": "direct"
+      }
+    ]
+  }
+}
+EOF
+  cat > ${CONF_DIR}/50_inbound_socks.json << EOF
+{
+  "inbounds": [
+    {
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+        "udp": true
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"]
+      },
+      "tag": "socks-in"
+    }
+  ]
+}
+EOF
+  cat > ${CONF_DIR}/60_outbound.json << EOF
+{
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "block"
+    }
+  ]
+}
+EOF
+}
 DAT_PATH=/usr/local/bin
 get_latest_stable_version
 identify_the_operating_system_and_architecture
@@ -149,7 +270,18 @@ TMP_DIRECTORY="$(mktemp -d)"
 download_xray
 decompression ${ZIP_FILE}
 systemctl stop xray
+echo Install Xray
 install_xray
+echo Insall Geo data
 install_geodata
+echo Install systemd service file
+install_startup_service_file
+CONF_DIR=/usr/local/etc/xray
+mkdir ${CONF_DIR}
+echo Install configs
+install_configs
+echo Start Xray
 systemctl start xray
+echo Remove ${TMP_DIRECTORY}
 rm -r "${TMP_DIRECTORY}"
+systemctl status xray|cat
