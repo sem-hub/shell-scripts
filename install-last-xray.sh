@@ -262,6 +262,67 @@ EOF
   ]
 }
 EOF
+  xray x25519 > ${CONF_DIR}/vless.keys
+  USER_ID=$(xray uuid)
+  PRIV_KEY=$(grep PrivateKey: ${CONF_DIR}/vless.keys|sed -e 's/PrivateKey: //')
+  SHORT_ID=$(openssl rand -hex 4)
+  cat > ${CONF_DIR}/55_inbound_vless.json << EOF
+{   
+  "inbounds": [
+    {   
+      "port": 5443,
+      "listen": "0.0.0.0",
+      "protocol": "vless",
+      "tag": "vless-in",
+      "settings": {
+        "clients": [
+          {   
+            "id": "${USER_ID}",
+            "level": 0,
+            "flow": "xtls-rprx-vision" ,
+            "email": "sem@semmy.ru"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "raw",
+        "rawSetting": {
+          "acceptProxyProtocol": true
+        },
+        "security": "reality",
+        "realitySettings": {
+          "show": false,                // if true, show debug info
+          "dest": "cedro.agency:443",
+          "serverNames": [
+            "cedro.agency"
+          ],
+          "fingerprint": "chrome",
+          "privateKey": "${PRIV_KEY}",
+          "shortIds": [
+            "${SHORT_ID}"
+          ]
+        },
+        "sockopt": {
+          "acceptProxyProtocol": true,
+          "tcpMptcp": true,
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "routeOnly": true
+      }
+    }
+  ]
+}
+EOF
 }
 DAT_PATH=/usr/local/bin
 get_latest_stable_version
@@ -285,3 +346,7 @@ systemctl start xray
 echo Remove ${TMP_DIRECTORY}
 rm -r "${TMP_DIRECTORY}"
 systemctl status xray|cat
+echo UUID: $USER_ID
+echo Reality values:
+grep PublicKey ${CONF_DIR}/vless.keys
+echo ShortID: $SHORT_ID
