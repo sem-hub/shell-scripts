@@ -283,7 +283,13 @@ EOF
             "email": "sem@semmy.ru"
           }
         ],
-        "decryption": "none"
+        "decryption": "none",
+        "fallbacks": [
+          {
+            "dest": 2023,
+            "xver": 1
+          }
+        ]
       },
       "streamSettings": {
         "network": "raw",
@@ -318,6 +324,66 @@ EOF
           "quic"
         ],
         "routeOnly": true
+      }
+    }
+  ]
+}
+EOF
+  USER_ID=$(xray uuid)
+  cat > ${CONF_DIR}/57_inbound_xhttp.json << EOF
+{
+  "inbounds": [                                                                                                                                                                   
+    {                                                                                                                                                                             
+      //"listen": "/dev/shm/xrxh.socket,0666",                                                                                                                                    
+      "listen": "127.0.0.1",                                                                                                                                                      
+      "port": 2023,                                                                                                                                                               
+      "protocol": "vless",                                                                                                                                                        
+      "tag": "xhttp-in",                                                                                                                                                          
+      "settings": {                                                                                                                                                               
+        //"decryption": "mlkem768x25519plus.native.600s.6M61F-QjNWXBBhkxW86bZlKQra36zUVVQnE1nL2wBk8",                                                                             
+        "decryption": "none",                                                                                                                                                     
+        "clients": [                                                                                                                                                              
+          {                                                                                                                                                                       
+            "id": "${USER_ID}",                                                                                                                         
+            "email": "sem-xhttp"                                                                                                                                                  
+          }                                                                                                                                                                       
+        ]                                                                                                                                                                         
+      },                                                                                                                                                                          
+      "streamSettings": {                                                                                                                                                         
+        "network": "xhttp",                                                                                                                                                       
+        "security": "none",
+        "xhttpSettings": {
+          "path": "/sem-xhttp",
+          "mode": "auto",
+          "extra": {
+            "noGRPCHeader": false,
+            "scMaxEachPostBytes": 1000000,
+            "scMinPostsIntervalMs": 30,
+            "xPaddingBytes": "100-1000",
+            "xmux": {
+              "maxConnections": 6,
+              "cMaxReuseTimes": "64-128",
+              "cMaxLifetimeMs": 0,
+              "hMaxRequestTimes": "800-900",
+              "hKeepAlivePeriod": 0
+            }
+          }
+        },
+        "sockopt": {
+          "acceptProxyProtocol": true,
+          "tcpMptcp": true,
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
+        }
+      },
+      "sniffing": {
+        //"routeOnly": true,
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
       }
     }
   ]
