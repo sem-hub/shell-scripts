@@ -329,7 +329,7 @@ EOF
   ]
 }
 EOF
-  USER_ID=$(xray uuid)
+  USER_ID2=$(xray uuid)
   cat > ${CONF_DIR}/57_inbound_xhttp.json << EOF
 {
   "inbounds": [                                                                                                                                                                   
@@ -344,7 +344,7 @@ EOF
         "decryption": "none",                                                                                                                                                     
         "clients": [                                                                                                                                                              
           {                                                                                                                                                                       
-            "id": "${USER_ID}",                                                                                                                         
+            "id": "${USER_ID2}",                                                                                                                         
             "email": "sem-xhttp"                                                                                                                                                  
           }                                                                                                                                                                       
         ]                                                                                                                                                                         
@@ -416,3 +416,4 @@ echo UUID: $USER_ID
 echo Reality values:
 grep PublicKey ${CONF_DIR}/vless.keys
 echo ShortID: $SHORT_ID
+echo UUID for xhttp: $USER_ID2
