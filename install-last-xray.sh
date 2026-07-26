@@ -262,7 +262,7 @@ EOF
   ]
 }
 EOF
-  xray x25519 > ${CONF_DIR}/vless.keys
+  xray x25519 > ${CONF_DIR}/reality.keys
   USER_ID=$(xray uuid)
   PRIV_KEY=$(grep PrivateKey: ${CONF_DIR}/vless.keys|sed -e 's/PrivateKey: //')
   SHORT_ID=$(openssl rand -hex 4)
