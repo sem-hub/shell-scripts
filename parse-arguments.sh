@@ -23,7 +23,8 @@ while [[ "$#" -gt 0 ]]; do
 		break
 	fi
 done
-cmd=""
+cmd="$1"
+shift
 while [[ "$#" -gt 0 ]]; do
 	cmd="$cmd $1"
 	shift
