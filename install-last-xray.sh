@@ -283,13 +283,7 @@ EOF
             "email": "sem@semmy.ru"
           }
         ],
-        "decryption": "none",
-        "fallbacks": [
-          {
-            "dest": 2023,
-            "xver": 1
-          }
-        ]
+        "decryption": "none"
       },
       "streamSettings": {
         "network": "raw",
