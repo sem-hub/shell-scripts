@@ -354,26 +354,7 @@ EOF
         "security": "none",
         "xhttpSettings": {
           "path": "/sem-xhttp",
-          "mode": "auto",
-          "extra": {
-            "noGRPCHeader": false,
-            "scMaxEachPostBytes": 1000000,
-            "scMinPostsIntervalMs": 30,
-            "xPaddingBytes": "100-1000",
-            "xmux": {
-              "maxConnections": 6,
-              "cMaxReuseTimes": "64-128",
-              "cMaxLifetimeMs": 0,
-              "hMaxRequestTimes": "800-900",
-              "hKeepAlivePeriod": 0
-            }
-          }
-        },
-        "sockopt": {
-          "acceptProxyProtocol": true,
-          "tcpMptcp": true,
-          "tcpFastOpen": true,
-          "tcpNoDelay": true
+          "mode": "auto"
         }
       },
       "sniffing": {
