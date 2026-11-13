@@ -1,7 +1,7 @@
 #!/bin/bash
 
 met_flag=false
-options=""
+options="-t"
 need_ip4=false
 while [[ "$#" -gt 0 ]]; do
 	if [[ $1 == -4 ]]; then
