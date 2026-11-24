@@ -1,7 +1,10 @@
 #!/bin/bash
 
+CHECK_SERVICES="nginx xray"
+
 check_service() {
 	service=$1
+	#echo "Checking service $service"
 	service_run=$(ps xa | grep -E "(^|[^[:alnum:]_-])$service([^[:alnum:]_-]|$)"|grep -v grep)
 	if [ -z "$service_run" ]; then
 		echo ERR: $service is down
@@ -9,13 +12,11 @@ check_service() {
 	fi
 	return 0
 }
-check_service "nginx"
-if [ $? -ne 0 ]; then
-	echo restart
-	sudo systemctl restart nginx
-fi
-check_service "xray"
-if [ $? -ne 0 ]; then
-	echo restart
-	sudo systemctl restart xray
-fi
+
+for service in $CHECK_SERVICES; do
+	check_service $service
+	if [ $? -ne 0 ]; then
+		echo restart
+		sudo systemctl restart $service
+	fi
+done
