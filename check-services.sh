@@ -1,6 +1,10 @@
 #!/bin/bash
 
-CHECK_SERVICES="nginx xray"
+if [ -f $( dirname $0 )/services ]; then
+	CHECK_SERVICES=`cat $(dirname $0)/services`
+else
+	CHECK_SERVICES="nginx xray"
+fi
 
 check_service() {
 	service=$1
