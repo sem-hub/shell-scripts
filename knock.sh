@@ -20,4 +20,4 @@ if ! $found; then
 	exit 1
 fi
 
-knock_host $1 $2
+knock_host -d 100 $1 $2
